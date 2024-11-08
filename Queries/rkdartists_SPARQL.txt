@@ -1,0 +1,136 @@
+# VALUE version
+# This query can be modified to include or exclude nationality, death date, and various occupations
+# All RKDartists with a death date > 1850: more than 15,000
+# All RKDartists that are architects, designers or photographers: 9,460 
+# All Dutch RKDartists that are architects, designers or photographers: 4,074
+# All RKDartists that are architects or designers: 4,338
+# All Dutch RKDartists that are architects or designers: 1,196
+
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix schema: <https://schema.org/>
+SELECT DISTINCT  ?s 
+  (GROUP_CONCAT(DISTINCT ?name; SEPARATOR="<|>") AS ?names)
+  
+  ?birthDate ?deathDate
+  
+(GROUP_CONCAT(DISTINCT ?birthPlace; SEPARATOR="<|>") AS ?birthPlaces)
+(GROUP_CONCAT(DISTINCT ?deathPlace; SEPARATOR="<|>") AS ?deathPlaces)
+(GROUP_CONCAT(DISTINCT ?type; SEPARATOR="<|>") AS ?occupations)
+
+where {
+  ?s rdf:type schema:Person.
+  ?s schema:name | schema:alternateName ?name. 
+  ?s schema:birthDate ?birthDate.
+  ?s schema:deathDate ?deathDate.
+  # FILTER(?deathDate > "1850")
+  ?s schema:nationality "Dutch"@en.  
+  
+  ?s schema:birthPlace ?birthPlace.
+  FILTER(ISLITERAL(?birthPlace))
+  FILTER(LANG(?birthPlace) = 'en')
+  
+  ?s schema:deathPlace ?deathPlace.
+  FILTER(ISLITERAL(?deathPlace))
+  FILTER(LANG(?deathPlace) = 'en')
+#"draftsperson"@en "photographer"@en
+  values ?type {"designer"@en "architect"@en  "architectural draftsperson"@en 
+  "architectural historian"@en "architectural sculptor"@en "architecture critic"@en
+"artisan"@en "court architect"@en "furniture designer"@en "industrial designer"@en "interior designer"@en "lighting designer"@en "photographer"@en}
+  ?s schema:additionalType ?type .
+  # FILTER(ISLITERAL(?type))
+  # FILTER(LANG(?type) = 'en')
+} group by ?s ?birthDate ?deathDate
+ 
+!!!!!!!
+# UNION version
+# All RKDartists that are architects and adjacent: 2,680
+# All RKDartists that are architects and adjacent including designers: 4,331
+# All RKDartists that are architects and adjacent including photographers: 8,094
+# All of the above: 9,667
+
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix schema: <https://schema.org/>
+SELECT DISTINCT  ?s 
+  (GROUP_CONCAT(DISTINCT ?name; SEPARATOR="<|>") AS ?names)
+  
+  ?birthDate ?deathDate
+  
+(GROUP_CONCAT(DISTINCT ?birthPlace; SEPARATOR="<|>") AS ?birthPlaces)
+(GROUP_CONCAT(DISTINCT ?deathPlace; SEPARATOR="<|>") AS ?deathPlaces)
+(GROUP_CONCAT(DISTINCT ?type; SEPARATOR="<|>") AS ?occupations)
+
+where {
+  ?s rdf:type schema:Person.
+  ?s schema:name | schema:alternateName ?name. 
+  ?s schema:birthDate ?birthDate.
+  ?s schema:deathDate ?deathDate.
+  # ?s schema:nationality "Dutch"@en.  
+  
+  ?s schema:birthPlace ?birthPlace.
+  FILTER(ISLITERAL(?birthPlace))
+  FILTER(LANG(?birthPlace) = 'en')
+  
+  ?s schema:deathPlace ?deathPlace.
+  FILTER(ISLITERAL(?deathPlace))
+  FILTER(LANG(?deathPlace) = 'en')
+  
+  # Options for occupations "draftsperson"@en "photographer"@en "designer"@en "architect"@en  "architectural draftsperson"@en 
+  # "architectural historian"@en "architectural sculptor"@en "architecture critic"@en
+  # "artisan"@en "court architect"@en "furniture designer"@en "industrial designer"@en 
+  # "interior designer"@en "lighting designer"@en 
+  { ?s schema:additionalType "architect"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en') }
+    # UNION
+  # {?s schema:additionalType "photographer"@en  .
+  # ?s schema:additionalType ?type .
+  #  # FILTER(ISLITERAL(?type))
+  #  FILTER(LANG(?type) = 'en')}
+  # UNION
+  # {?s schema:additionalType "designer"@en  .
+  # ?s schema:additionalType ?type .
+  #  # FILTER(ISLITERAL(?type))
+  #  FILTER(LANG(?type) = 'en')}
+    UNION
+  {?s schema:additionalType "architectural draftsperson"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}
+    UNION
+  {?s schema:additionalType "architecture critic"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}
+    UNION
+  {?s schema:additionalType "architectural historian"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}  
+    UNION
+  {?s schema:additionalType "architectural sculptor"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}  
+    UNION
+  {?s schema:additionalType "furniture designer"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}
+    UNION
+  {?s schema:additionalType "interior designer"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}
+    UNION
+  {?s schema:additionalType "industrial designer"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}  
+    UNION
+  {?s schema:additionalType "lighting designer"@en  .
+  ?s schema:additionalType ?type .
+   # FILTER(ISLITERAL(?type))
+   FILTER(LANG(?type) = 'en')}    
+} group by ?s ?birthDate ?deathDate
+ 

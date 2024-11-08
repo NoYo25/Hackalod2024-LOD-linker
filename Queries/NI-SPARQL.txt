@@ -1,0 +1,43 @@
+# https://collectiedata.hetnieuweinstituut.nl/the-other-interface/knowledge-graph/sparql
+# 3,064 Records on 08 Nov 2024
+
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix sdo: <https://schema.org/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?s #?name ?birthDate ?deathDate ?birthPlaceLabel ?deathPlaceLabel
+  (GROUP_CONCAT(DISTINCT ?name; SEPARATOR="<|>") AS ?names)
+  (GROUP_CONCAT(DISTINCT ?birthDate; SEPARATOR="<|>") AS ?birthDates)
+  (GROUP_CONCAT(DISTINCT ?deathDate; SEPARATOR="<|>") AS ?deathDates)
+  (GROUP_CONCAT(DISTINCT ?birthPlaceLabel; SEPARATOR="<|>") AS ?birthPlaceLabels)
+  (GROUP_CONCAT(DISTINCT ?deathPlaceLabel; SEPARATOR="<|>") AS ?deathPlaceLabels)
+
+  # (GROUP_CONCAT(DISTINCT ?memberOf; SEPARATOR="<|>") AS ?memberOfs)
+  # (GROUP_CONCAT(DISTINCT ?memberOfDescription; SEPARATOR="<|>") AS ?memberOfDescriptions)
+  (GROUP_CONCAT(DISTINCT ?occupation; SEPARATOR="<|>") AS ?occupations)
+  # (GROUP_CONCAT(DISTINCT ?role; SEPARATOR="<|>") AS ?roles)
+
+   Where {
+  ?s rdf:type sdo:Person . 
+  ?s sdo:name ?name . 
+
+  OPTIONAL {?s sdo:deathDate ?deathDate.
+  ?s sdo:deathPlace ?deathPlace. 
+  ?deathPlace skos:prefLabel ?deathPlaceLabel.}
+  FILTER(LANG(?deathPlaceLabel) = "en")
+     
+  ?s sdo:birthDate ?birthDate.
+  ?s sdo:birthPlace ?birthPlace .
+  ?birthPlace skos:prefLabel ?birthPlaceLabel.
+  FILTER(LANG(?birthPlaceLabel) = "en")
+
+   
+  ?s sdo:hasOccupation ?occupationObj.
+  ?occupationObj skos:prefLabel ?occupation.
+  FILTER(LANG(?occupation) = "en")
+
+
+} 
+GROUP BY ?s #?name ?birthDate ?deathDate ?birthPlaceLabel ?deathPlaceLabel
+# LIMIT 100

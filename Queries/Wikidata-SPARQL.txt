@@ -1,0 +1,43 @@
+# https://query.wikidata.org/ 
+# 3792 Records on 08 Nov 2024
+
+SELECT ?person 
+(GROUP_CONCAT(DISTINCT ?personLabel; SEPARATOR="<|>") AS ?personLabels) 
+(GROUP_CONCAT(DISTINCT ?birthDate; SEPARATOR="<|>") AS ?birthDates) 
+(GROUP_CONCAT(DISTINCT ?birthPlaceLabel; SEPARATOR="<|>") AS ?birthPlaceLabels) 
+(GROUP_CONCAT(DISTINCT ?deathDate; SEPARATOR="<|>") AS ?deathDates) 
+(GROUP_CONCAT(DISTINCT ?deathPlaceLabel; SEPARATOR="<|>") AS ?deathPlaceLabels) 
+(GROUP_CONCAT(DISTINCT ?occupationLabel; SEPARATOR="<|>") AS ?occupationLabels) 
+
+WHERE {
+  ?person wdt:P106 ?occupation;        # Occupation: Architect, Photographer
+         # wdt:P27 wd:Q55; # Country of Citizenship is Netherlands
+          wdt:P19 ?birthPlace;       # Birth place
+          wdt:P569 ?birthDate;      # Birth date
+          rdfs:label ?personLabel.
+  
+ 
+  FILTER(LANG(?personLabel) = "en")
+  
+  ?person rdfs:label ?birthPlaceLabel. 
+  FILTER(LANG(?birthPlaceLabel) = "en")
+  
+  OPTIONAL { ?person wdt:P20 ?deathPlace.
+             ?deathPlace rdfs:label ?deathPlaceLabel .
+             FILTER(LANG(?deathPlaceLabel) = "en") }  # Death place
+  
+  ?person wdt:P570 ?deathDate.   # Death date
+#   FILTER(YEAR(?deathDate) > "1800")
+ 
+  ?birthPlace wdt:P17 wd:Q55.         # Birth place is in the Netherlands (P17: Country, Q55: Netherlands)
+     
+  VALUES ?occupation {wd:Q42973 wd:Q33231 wd:Q5322166 } #
+  
+  ?occupation  rdfs:label ?occupationLabel.
+  FILTER(LANG(?occupationLabel) = "en")
+}
+GROUP BY ?person  ?personLabel 
+
+#ORDER BY ?personLabel
+LIMIT 4000
+  
